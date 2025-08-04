@@ -60,7 +60,7 @@ Acesse [http://localhost:3000](http://localhost:3000) no navegador.
 
 ## Créditos
 
-Desenvolvido por estudantes da disciplina de Redes de Computadores — Ciência da Computação — UFPEL
+Desenvolvido por Pedro, Rafael e Mauro da disciplina de Redes de Computadores — Ciência da Computação — UFPEL
 
 Professor: Guilherme Corrêa
 
