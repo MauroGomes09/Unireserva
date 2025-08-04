@@ -1,36 +1,73 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Unireserva
 
-## Getting Started
+Trabalho da disciplina de **Redes de Computadores** do curso de **Ciência da Computação** da **Universidade Federal de Pelotas (UFPEL)**, ministrada pelo professor **Guilherme Corrêa**.
 
-First, run the development server:
+---
+
+## Descrição do Projeto
+
+O Unireserva é um sistema web para reserva de salas e laboratórios, desenvolvido como atividade prática para aplicar conceitos de redes, comunicação cliente-servidor e integração de sistemas web modernos.
+
+O sistema permite:
+- Visualizar salas e horários disponíveis
+- Reservar horários em salas específicas
+- Visualizar reservas por data
+
+A aplicação é composta por:
+- **Frontend**: Desenvolvido em Next.js (React)
+- **Backend**: Servidor Python (HTTPServer) que gerencia as reservas e persistência em arquivo JSON
+
+---
+
+## Como Executar
+
+### 1. Inicie o servidor backend (Python)
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+python server.py
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+O servidor será iniciado em `http://127.0.0.1:5000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 2. Inicie o frontend (Next.js)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm install
+npm run dev
+```
 
-## Learn More
+Acesse [http://localhost:3000](http://localhost:3000) no navegador.
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Estrutura do Projeto
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `server.py`: Servidor Python responsável pela API de reservas
+- `rooms.json`: Persistência das reservas
+- `src/`: Código-fonte do frontend (Next.js)
+- `public/`: Assets estáticos
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Tecnologias Utilizadas
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [Next.js](https://nextjs.org/) 15+
+- [React](https://react.dev/) 19+
+- [Python](https://www.python.org/) 3+
+- HTTPServer (biblioteca padrão Python)
+
+---
+
+## Créditos
+
+Desenvolvido por estudantes da disciplina de Redes de Computadores — Ciência da Computação — UFPEL
+
+Professor: Guilherme Corrêa
+
+---
+
+## Observações
+
+- O backend deve estar rodando para o frontend funcionar corretamente.
+- As reservas são persistidas no arquivo `rooms.json`.
+- O projeto pode ser adaptado para outros contextos de reserva de recursos.
