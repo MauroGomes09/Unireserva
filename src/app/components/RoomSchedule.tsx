@@ -95,6 +95,12 @@ export default function RoomSchedule({ updateTrigger }: RoomScheduleProps) {
             onChange={e => setInputDate(e.target.value)}
             className={styles.input}
             onKeyDown={handleInputKeyDown}
+            onClick={(e) => {
+                  const input = e.target as HTMLInputElement;
+                  if ( input.showPicker) {
+                    input.showPicker();
+                  }
+                }}
           />
           <button
             type="submit"

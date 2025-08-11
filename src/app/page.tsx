@@ -16,10 +16,15 @@ interface Reservation {
   time_slot: string;
 }
 
+const getToday = () => {
+  const today = new Date();
+  return today.toISOString().split('T')[0]; 
+}
+
 export default function Home() {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [selectedRoom, setSelectedRoom] = useState('');
-  const [date, setDate] = useState('');
+  const [date, setDate] = useState(getToday());
   const [timeSlot, setTimeSlot] = useState('');
   const [userName, setUserName] = useState('');
   const [message, setMessage] = useState('');
@@ -184,6 +189,12 @@ export default function Home() {
                 pattern="\d{4}-\d{2}-\d{2}"
                 placeholder="YYYY-MM-DD"
                 autoComplete="off"
+                onClick={(e) => {
+                  const input = e.target as HTMLInputElement;
+                  if ( input.showPicker) {
+                    input.showPicker();
+                  }
+                }}
               />
             </div>
             <div className={styles.formGroup}>
