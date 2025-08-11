@@ -32,7 +32,7 @@ export default function RoomSchedule({ updateTrigger }: RoomScheduleProps) {
   // Busca só quando clicar em buscar ou pressionar Enter
   const fetchRooms = (date: string) => {
     setLoading(true);
-    fetch(`http://127.0.0.1:5000/salas?date=${date}`)
+    fetch(`https://127.0.0.1:5000/salas?date=${date}`)
       .then((res) => res.json())
       .then((data) => {
         setRoomData(data.rooms || {});

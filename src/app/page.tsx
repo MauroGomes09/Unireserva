@@ -48,7 +48,7 @@ export default function Home() {
       setRoomReservations([]);
       return;
     }
-    fetch(`http://127.0.0.1:5000/salas?date=${date}`)
+    fetch(`https://127.0.0.1:5000/salas?date=${date}`)
       .then(res => res.json())
       .then(data => {
         const reservas = (data.rooms?.[selectedRoom] || []);
@@ -62,7 +62,7 @@ export default function Home() {
 
   const fetchRooms = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:5000', {
+      const response = await fetch('https://127.0.0.1:5000', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -88,7 +88,7 @@ export default function Home() {
     setMessage('');
     setSuccess(false);
     try {
-      const response = await fetch('http://127.0.0.1:5000', {
+      const response = await fetch('https://127.0.0.1:5000', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -121,7 +121,7 @@ export default function Home() {
     setMessage('');
     setSuccess(false);
     try {
-      const response = await fetch('http://127.0.0.1:5000', {
+      const response = await fetch('https://127.0.0.1:5000', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -1,6 +1,7 @@
 import socket
 import threading
 import json
+import ssl  
 from datetime import datetime
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import json
@@ -169,7 +170,22 @@ def cancel_reservation(msg):
 
 if __name__ == "__main__":
     server = HTTPServer((HOST, PORT), RequestHandler)
-    print(f"[SERVIDOR] Iniciando em {HOST}:{PORT}")
+    
+    try:
+        context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        
+        context.load_cert_chain('server.crt', 'server.key')
+        
+        server.socket = context.wrap_socket(server.socket, server_side=True)
+        
+        print(f"[SERVIDOR] Iniciando HTTPS em {HOST}:{PORT}")
+        print("[INFO] Servidor rodando com TLS/SSL ativado 🔒")
+        
+    except FileNotFoundError:
+        print("[ERRO] Certificados não encontrados! Gerando certificados...")
+        print("[INFO] Execute: openssl req -x509 -newkey rsa:4096 -keyout server.key -out server.crt -days 365 -nodes")
+        print("[SERVIDOR] Iniciando em HTTP (sem TLS) em {HOST}:{PORT}")
+        
     try:
         server.serve_forever()
     except KeyboardInterrupt:
