@@ -7,15 +7,13 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 import json
 from urllib.parse import urlparse, parse_qs
 
-HOST = "127.0.0.1"
+HOST = "0.0.0.0"  
 PORT = 5000
 
-# Salas e reservas (poderia vir de um arquivo JSON)
 rooms = json.load(open("rooms.json"))
 
 lock = threading.Lock()
 
-# Horários padrão permitidos
 VALID_TIME_SLOTS = [
     "08:00-09:30",
     "09:45-11:15",
@@ -26,6 +24,17 @@ VALID_TIME_SLOTS = [
     "19:00-20:30",
     "20:45-22:15"
 ]
+
+def get_local_ip():
+    """Obtém o IP local da máquina"""
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        local_ip = s.getsockname()[0]
+        s.close()
+        return local_ip
+    except:
+        return "127.0.0.1"
 
 class RequestHandler(BaseHTTPRequestHandler):
     def do_OPTIONS(self):
@@ -80,6 +89,11 @@ class RequestHandler(BaseHTTPRequestHandler):
         self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
         self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+
+    def log_message(self, format, *args):
+        """Log customizado para mostrar qual cliente está acessando"""
+        client_ip = self.client_address[0]
+        print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {client_ip} - {format % args}")
 
 def process_request(msg):
     msg_type = msg.get("type")
@@ -169,26 +183,45 @@ def cancel_reservation(msg):
     return {"type": "RES_ERROR", "error": "Reserva não encontrada"}
 
 if __name__ == "__main__":
+    local_ip = get_local_ip()
+    
     server = HTTPServer((HOST, PORT), RequestHandler)
+    
+    print("=" * 60)
+    print("UNIRESERVA - SERVIDOR DE RESERVAS")
+    print("=" * 60)
     
     try:
         context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-        
         context.load_cert_chain('server.crt', 'server.key')
-        
         server.socket = context.wrap_socket(server.socket, server_side=True)
         
-        print(f"[SERVIDOR] Iniciando HTTPS em {HOST}:{PORT}")
-        print("[INFO] Servidor rodando com TLS/SSL ativado 🔒")
+        print(f"Servidor HTTPS iniciado!")
+        print(f"Servidor local: https://{local_ip}:{PORT}")
+        print(f"Localhost: https://127.0.0.1:{PORT}")
+        print("\n Para acessar de outros dispositivos na rede:")
+        print(f"   Use: https://{local_ip}:{PORT}")
         
     except FileNotFoundError:
-        print("[ERRO] Certificados não encontrados! Gerando certificados...")
-        print("[INFO] Execute: openssl req -x509 -newkey rsa:4096 -keyout server.key -out server.crt -days 365 -nodes")
-        print("[SERVIDOR] Iniciando em HTTP (sem TLS) em {HOST}:{PORT}")
-        
+        print(" Certificados SSL não encontrados!")
+        print(" Para gerar certificados SSL, execute:")
+        print("   openssl req -x509 -newkey rsa:4096 -keyout server.key -out server.crt -days 365 -nodes")
+        print(f"\n Servidor HTTP iniciado (sem SSL)")
+        print(f" Servidor local: http://{local_ip}:{PORT}")
+        print(f" Localhost: http://127.0.0.1:{PORT}")
+        print(f"\n Para acessar de outros dispositivos na rede:")
+        print(f"   Use: http://{local_ip}:{PORT}")
+    
+    print("\n🔥 Servidor rodando... (Ctrl+C para parar)")
+    print("📊 Logs de conexão:")
+    print("-" * 60)
+    
     try:
         server.serve_forever()
     except KeyboardInterrupt:
-        pass
-    server.server_close()
-    print("[SERVIDOR] Servidor encerrado")
+        print("\n\nServidor encerrado pelo usuário")
+    except Exception as e:
+        print(f"\nErro no servidor: {e}")
+    finally:
+        server.server_close()
+        print("Servidor finalizado")
