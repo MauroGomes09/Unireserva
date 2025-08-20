@@ -21,12 +21,10 @@ const getToday = () => {
   return today.toISOString().split('T')[0]; 
 }
 
-// Configuração do servidor - MUDE AQUI O IP DO SEU SERVIDOR
 const getServerUrl = () => {
-  // Você pode definir o IP do servidor aqui ou via variável de ambiente
-  const serverIP = process.env.NEXT_PUBLIC_SERVER_IP || '192.168.1.100'; // MUDE ESTE IP
-  const serverPort = process.env.NEXT_PUBLIC_SERVER_PORT || '5000';
-  const useHTTPS = process.env.NEXT_PUBLIC_USE_HTTPS === 'true';
+  const serverIP = process.env.NEXT_PUBLIC_SERVER_IP 
+  const serverPort = process.env.NEXT_PUBLIC_SERVER_PORT
+  const useHTTPS = process.env.NEXT_PUBLIC_USE_HTTPS 
   
   return `${useHTTPS ? 'https' : 'http'}://${serverIP}:${serverPort}`;
 };
@@ -43,16 +41,12 @@ export default function Home() {
   const [success, setSuccess] = useState(false);
   const [roomReservations, setRoomReservations] = useState<Reservation[]>([]);
   const [serverUrl, setServerUrl] = useState('');
-  const [customServerIp, setCustomServerIp] = useState('');
-  const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'error'>('connecting');
 
-  // Converter fetchRooms para useCallback para resolver o warning do ESLint
-  const fetchRooms = useCallback(async (url = serverUrl) => {
-    if (!url) return;
+  const fetchRooms = useCallback(async () => {
+    if (!serverUrl) return;
     
-    setConnectionStatus('connecting');
     try {
-      const response = await fetch(url, {
+      const response = await fetch(serverUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -62,23 +56,20 @@ export default function Home() {
       const data = await response.json();
       if (data.rooms) {
         setRooms(data.rooms.map((id: string) => ({ id })));
-        setConnectionStatus('connected');
         setMessage('');
       }
     } catch {
-      setConnectionStatus('error');
-      setMessage(`Erro ao conectar com o servidor ${url}. Verifique se o servidor está rodando e se o IP está correto.`);
+      setMessage(`Erro ao conectar com o servidor. Verifique se o servidor está rodando.`);
     }
-  }, [serverUrl]); // Incluir serverUrl como dependência
+  }, [serverUrl]); 
 
   useEffect(() => {
     const url = getServerUrl();
     setServerUrl(url);
-    // Chamar fetchRooms diretamente com a URL ao invés de depender do state
+    
     const initializeFetch = async () => {
       if (!url) return;
       
-      setConnectionStatus('connecting');
       try {
         const response = await fetch(url, {
           method: 'POST',
@@ -90,24 +81,20 @@ export default function Home() {
         const data = await response.json();
         if (data.rooms) {
           setRooms(data.rooms.map((id: string) => ({ id })));
-          setConnectionStatus('connected');
           setMessage('');
         }
       } catch {
-        setConnectionStatus('error');
-        setMessage(`Erro ao conectar com o servidor ${url}. Verifique se o servidor está rodando e se o IP está correto.`);
+        setMessage(`Erro ao conectar com o servidor. Verifique se o servidor está rodando.`);
       }
     };
     
     initializeFetch();
-  }, []); // Agora não precisa de dependências pois não usa fetchRooms
+  }, []); 
 
-  // Limpar horário selecionado ao mudar sala ou data
   useEffect(() => {
     setTimeSlot('');
   }, [selectedRoom, date]);
 
-  // Buscar reservas da sala/data selecionada
   useEffect(() => {
     if (!selectedRoom || !/^\d{4}-\d{2}-\d{2}$/.test(date) || !serverUrl) {
       setRoomReservations([]);
@@ -124,22 +111,6 @@ export default function Home() {
 
   const horariosOcupados = roomReservations.map(r => r.time_slot);
   const horariosLivres = HORARIOS_PADRAO.filter(h => !horariosOcupados.includes(h));
-
-  const connectToCustomServer = () => {
-    if (!customServerIp.trim()) {
-      setMessage('Digite um IP válido');
-      return;
-    }
-    
-    const protocol = customServerIp.includes('https://') || customServerIp.includes('http://') 
-      ? '' 
-      : 'http://';
-    const port = customServerIp.includes(':') ? '' : ':5000';
-    const newUrl = `${protocol}${customServerIp}${port}`;
-    
-    setServerUrl(newUrl);
-    fetchRooms(newUrl);
-  };
 
   const checkAvailability = async () => {
     if (!selectedRoom || !date || !timeSlot) {
@@ -222,43 +193,6 @@ export default function Home() {
       <div className={styles.container}>
         <h1 className={styles.title}>UNIRESERVA</h1>
         
-        {/* Status de Conexão */}
-        <div className={styles.card} style={{ marginBottom: 20 }}>
-          <h3>🌐 Conexão com Servidor</h3>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-            <span>Status: </span>
-            <span style={{ 
-              color: connectionStatus === 'connected' ? 'green' : 
-                     connectionStatus === 'error' ? 'red' : 'orange',
-              fontWeight: 'bold'
-            }}>
-              {connectionStatus === 'connected' ? '🟢 Conectado' : 
-               connectionStatus === 'error' ? '🔴 Erro' : '🟡 Conectando...'}
-            </span>
-          </div>
-          <div style={{ fontSize: 14, marginBottom: 10 }}>
-            Servidor atual: <code>{serverUrl}</code>
-          </div>
-          
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-            <input
-              type="text"
-              placeholder="Ex: 192.168.1.100 ou 192.168.1.100:5000"
-              value={customServerIp}
-              onChange={(e) => setCustomServerIp(e.target.value)}
-              className={styles.input}
-              style={{ flex: 1 }}
-            />
-            <button 
-              onClick={connectToCustomServer}
-              className={styles.button}
-              style={{ background: '#4a90e2', color: 'white' }}
-            >
-              Conectar
-            </button>
-          </div>
-        </div>
-
         <div className={styles.grid}>
           <div className={styles.card}>
             <h2>Reserva de Salas</h2>
@@ -268,7 +202,7 @@ export default function Home() {
                 value={selectedRoom}
                 onChange={(e) => setSelectedRoom(e.target.value)}
                 className={styles.select}
-                disabled={loading || connectionStatus !== 'connected'}
+                disabled={loading}
               >
                 <option value="">Selecione uma sala</option>
                 {rooms.map((room) => (
@@ -285,7 +219,7 @@ export default function Home() {
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
                 className={styles.input}
-                disabled={loading || connectionStatus !== 'connected'}
+                disabled={loading}
                 pattern="\d{4}-\d{2}-\d{2}"
                 placeholder="YYYY-MM-DD"
                 autoComplete="off"
@@ -305,7 +239,7 @@ export default function Home() {
                     value={timeSlot}
                     onChange={(e) => setTimeSlot(e.target.value)}
                     className={styles.select}
-                    disabled={loading || connectionStatus !== 'connected'}
+                    disabled={loading}
                   >
                     <option value="">Selecione um horário</option>
                     {horariosLivres.map((horario) => (
@@ -333,14 +267,14 @@ export default function Home() {
                 onChange={(e) => setUserName(e.target.value)}
                 className={styles.input}
                 placeholder="Seu nome"
-                disabled={loading || connectionStatus !== 'connected'}
+                disabled={loading}
               />
             </div>
             <div className={styles.buttonGroup}>
               <button
                 onClick={checkAvailability}
                 className={styles.button}
-                disabled={loading || horariosLivres.length === 0 || connectionStatus !== 'connected'}
+                disabled={loading || horariosLivres.length === 0}
                 style={{ background: '#3182ce', color: 'white', fontWeight: 600 }}
               >
                 {loading ? 'Verificando...' : 'Verificar Disponibilidade'}
@@ -348,7 +282,7 @@ export default function Home() {
               <button
                 onClick={bookRoom}
                 className={`${styles.button} ${styles.primary}`}
-                disabled={loading || horariosLivres.length === 0 || connectionStatus !== 'connected'}
+                disabled={loading || horariosLivres.length === 0}
                 style={{ background: '#2b6cb0', color: 'white', fontWeight: 600 }}
               >
                 {loading ? 'Reservando...' : 'Reservar Sala'}
@@ -364,6 +298,7 @@ export default function Home() {
             )}
           </div>
           <RoomSchedule 
+            serverUrl={serverUrl}
             key={updateTrigger} 
             updateTrigger={updateTrigger}
           />

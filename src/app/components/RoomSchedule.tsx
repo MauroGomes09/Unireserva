@@ -13,10 +13,11 @@ interface RoomData {
 }
 
 interface RoomScheduleProps {
+  serverUrl: string;
   updateTrigger?: number;
 }
 
-export default function RoomSchedule({ updateTrigger }: RoomScheduleProps) {
+export default function RoomSchedule({ serverUrl,updateTrigger }: RoomScheduleProps) {
   const [roomData, setRoomData] = useState<RoomData>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -31,8 +32,9 @@ export default function RoomSchedule({ updateTrigger }: RoomScheduleProps) {
 
   // Busca só quando clicar em buscar ou pressionar Enter
   const fetchRooms = (date: string) => {
+    if (!serverUrl) return; 
     setLoading(true);
-    fetch(`https://127.0.0.1:5000/salas?date=${date}`)
+     fetch(`${serverUrl}/salas?date=${date}`)
       .then((res) => res.json())
       .then((data) => {
         setRoomData(data.rooms || {});
