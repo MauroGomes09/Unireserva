@@ -42,11 +42,11 @@ export default function Home() {
   const [roomReservations, setRoomReservations] = useState<Reservation[]>([]);
   const [serverUrl, setServerUrl] = useState('');
 
-  const fetchRooms = useCallback(async () => {
-    if (!serverUrl) return;
+  const fetchRooms = useCallback(async (url: string) => {
+    if (!url) return;
     
     try {
-      const response = await fetch(serverUrl, {
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -61,35 +61,13 @@ export default function Home() {
     } catch {
       setMessage(`Erro ao conectar com o servidor. Verifique se o servidor está rodando.`);
     }
-  }, [serverUrl]); 
+  }, []); 
 
   useEffect(() => {
     const url = getServerUrl();
     setServerUrl(url);
-    
-    const initializeFetch = async () => {
-      if (!url) return;
-      
-      try {
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ type: 'REQ_LIST' }),
-        });
-        const data = await response.json();
-        if (data.rooms) {
-          setRooms(data.rooms.map((id: string) => ({ id })));
-          setMessage('');
-        }
-      } catch {
-        setMessage(`Erro ao conectar com o servidor. Verifique se o servidor está rodando.`);
-      }
-    };
-    
-    initializeFetch();
-  }, []); 
+    fetchRooms(url);
+  }, [fetchRooms]); 
 
   useEffect(() => {
     setTimeSlot('');
